@@ -15,7 +15,6 @@ const MovieSchema = new mongoose.Schema({
     rating: { type: Number, min: 0, max: 10 },
     mediaSize: { type: Number, default: 0 },
     upBy: { type: String, default: "admin" },
-    watched: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Movie', MovieSchema);

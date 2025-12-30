@@ -14,11 +14,11 @@ exports.getMovieList = async (req, res) => {
         let date = new Date();
         let year = date.getFullYear();
 
-        let newMovieList = await Movie.find({ year: { $gte: year } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
+        let newMovieList = await Movie.find({ image: { $exists: true, $ne: "" }, videoUrl: { $exists: true, $ne: "" }, year: { $gte: year } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
 
-        let bestMovieList = await Movie.find({ rating: { $gt: 7 } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
+        let bestMovieList = await Movie.find({ image: { $exists: true, $ne: "" }, videoUrl: { $exists: true, $ne: "" }, rating: { $gt: 7 } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
 
-        let bestSeriesList = await Movie.find({ type: "series", rating: { $gt: 7 } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
+        let bestSeriesList = await Movie.find({ type: "series", rating: { $gt: 7 } }).select('title bio year image genre rating language duration').limit(50).sort({ image: { $exists: true, $ne: "" }, videoUrl: { $exists: true, $ne: "" }, createdAt: -1 }).lean();
 
         // console.log("Best-Movies: ", bestMovieList);
         // console.log("New-Movies: ", newMovieList);
@@ -35,12 +35,9 @@ exports.getMovieList = async (req, res) => {
 exports.getAllMovies = async (req, res) => {
     try {
 
-        console.log("I was called");
-        
+        let movieList = await Movie.find({ image: { $exists: true, $ne: "" }, videoUrl: { $exists: true, $ne: "" } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
 
-        let movieList = await Movie.find().select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
-
-        res.status(200).json({ok: true, movieList})
+        res.status(200).json({ ok: true, movieList })
 
     } catch (error) {
         res.status(500).json({ ok: false, message: error.message })
@@ -49,7 +46,44 @@ exports.getAllMovies = async (req, res) => {
 exports.getMovieListAdmin = async (req, res) => {
     try {
 
-        let movieList = await Movie.find().select('title year genre watched upBy').limit(100).sort({ createdAt: -1 }).lean();
+
+        let movieList = await Movie.aggregate([
+            {
+                $sort: { createdAt: -1 }
+            },
+            {
+                $lookup: {
+
+                    from: "watcheds",
+                    let: { movieId: { $toString: "$_id" } },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$movieId", "$$movieId"] }
+                            }
+                        }
+                    ],
+                    as: "watch"
+                }
+            },
+            {
+                $addFields: {
+                    watched: { $size: "$watch" }
+                }
+            },
+            {
+                $project: {
+                    title: 1,
+                    year: 1,
+                    genreL: 1,
+                    upBy: 1,
+                    rating: 1,
+                    watched: 1
+                }
+            }
+
+        ]);
+
 
         res.status(200).json({ ok: true, data: movieList })
 
