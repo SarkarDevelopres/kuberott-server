@@ -18,7 +18,7 @@ exports.getMovieList = async (req, res) => {
 
         let bestMovieList = await Movie.find({ image: { $exists: true, $ne: "" }, videoUrl: { $exists: true, $ne: "" }, rating: { $gt: 7 } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
 
-        let bestSeriesList = await Movie.find({ type: "series", rating: { $gt: 7 } }).select('title bio year image genre rating language duration').limit(50).sort({ image: { $exists: true, $ne: "" }, videoUrl: { $exists: true, $ne: "" }, createdAt: -1 }).lean();
+        let bestSeriesList = await Movie.find({ image: { $exists: true, $ne: "" }, videoUrl: { $exists: true, $ne: "" }, type: "series", rating: { $gt: 7 } }).select('title bio year image genre rating language duration').limit(50).sort({ createdAt: -1 }).lean();
 
         // console.log("Best-Movies: ", bestMovieList);
         // console.log("New-Movies: ", newMovieList);
