@@ -2,6 +2,7 @@ const User = require('../db/models/user');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const Watched = require('../db/models/watched');
+const AdWatched = require('../db/models/adwatched');
 dotenv.config();
 
 
@@ -103,18 +104,15 @@ exports.getWatchHistory = async (req, res) => {
 
 exports.updateMovieWatched = async (req, res) => {
     try {
-        console.log("I was called");
 
         const { duration, token, movieId } = req.body;
-
-        console.log("Duration: ", duration);
 
 
         if (!token) {
             return res.status(403).json({ ok: false, messages: "Unautorised Accesss" });
         }
 
-        if (!movieId || movieId.trim() === "" || !duration) {
+        if (!movieId || movieId.trim() === "") {
             return res.status(400).json({ ok: false, message: "Invalid movie" });
         }
 
@@ -134,7 +132,6 @@ exports.updateMovieWatched = async (req, res) => {
         }
 
         const parsed = Number(duration);
-        console.log("Type of Duration: ", typeof parsed);
 
         if (typeof parsed != "number") {
             return res.status(400).json({ ok: false, message: "Invalid Duration" });
@@ -147,7 +144,11 @@ exports.updateMovieWatched = async (req, res) => {
             duration: parsed
         }, {
             upsert: true,
-        })
+        });
+
+        await AdWatched.create({
+            userId: userId
+        });
 
         return res.status(200).json({ ok: true, message: "Watch History Updated" })
 

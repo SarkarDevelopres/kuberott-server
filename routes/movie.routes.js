@@ -7,6 +7,7 @@ router.get('/getAllMovies', MovieController.getAllMovies);
 router.get('/getMovieListAdmin', MovieController.getMovieListAdmin);
 router.get('/getMovieListByGenre', MovieController.getMovieListByGenre);
 router.get('/getMovieListBySearch', MovieController.getMovieListBySearch);
+router.get('/getMovieListByLanguage', MovieController.getMovieListByLanguage);
 router.get('/fetchMovieData',MovieController.fetchMovieData);
 router.get('/fetchMovieDataClient',MovieController.fetchMovieDataClient);
 router.get('/fetchMovieURL',MovieController.fetchMovieURL);

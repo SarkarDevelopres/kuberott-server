@@ -146,6 +146,33 @@ exports.getMovieListBySearch = async (req, res) => {
         res.status(500).json({ ok: false, message: error.message })
     }
 }
+exports.getMovieListByLanguage = async (req, res) => {
+    try {
+
+        console.log("Came till here ?");
+
+
+        const { language } = req.query;
+        console.log(language);
+
+
+        if (!language || language.trim() === "") {
+            return res.json({ ok: false, message: "Empty language" });
+        }
+
+        let movieList = await Movie.find({ language: { $in: [language] } })
+            .select('title bio year image genre rating language duration')
+            .limit(50)
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.status(200).json({ ok: true, data: movieList })
+
+
+    } catch (error) {
+        res.status(500).json({ ok: false, message: error.message })
+    }
+}
 exports.fetchMovieData = async (req, res) => {
     try {
 

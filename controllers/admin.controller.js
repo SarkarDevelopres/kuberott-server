@@ -859,15 +859,21 @@ exports.updateMovieMedia = async (req, res) => {
 exports.recordMedia = async (req, res) => {
     try {
 
-        const { imgURL, videoURL, movieId, token } = req.body;
+        const { imgURL, videoURL, movieId, token, duration } = req.body;
 
-        if (!imgURL || !videoURL || !movieId || !token) {
+        console.log("Duration: ",duration);
+        
+
+        if (!imgURL || !videoURL || !movieId || !token || !duration) {
             return res.status(400).json({ ok: false, message: "Missing fields!" });
         }
 
+        let parsedDuration = Number(duration);
+
         let movie = await Movie.findByIdAndUpdate(movieId, {
             image: imgURL,
-            videoUrl: videoURL
+            videoUrl: videoURL,
+            duration: parsedDuration*1000
         }).lean();
 
         if (!movie) {
