@@ -156,3 +156,36 @@ exports.updateMovieWatched = async (req, res) => {
         res.status(500).json({ ok: false, message: error.message })
     }
 }
+
+exports.getData = async (req, res) => {
+    try {
+
+       const { token } = req.query;
+
+        if (!token) {
+            return res.status(403).json({ ok: false, messages: "Unautorised Accesss" });
+        }
+
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(401).json({ ok: false, message: "Invalid or expired token" });
+        }
+
+        let userId = decodedToken.userId;
+
+        let userExists = await User.findOne({ _id: userId }).select('phone email');
+
+        if (!userExists) {
+            return res.status(400).json({ ok: false, message: "Invalid Access" });
+        }
+
+        let adsWatched = await AdWatched.countDocuments({ userId: userId });       
+
+        return res.status(200).json({ ok: true, adsWatched, email: userExists.email.email, phone: userExists.phone.number, withdrawl: 0 })
+
+    } catch (error) {
+        res.status(500).json({ ok: false, message: error.message })
+    }
+}
